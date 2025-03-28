@@ -1,0 +1,7 @@
+Flask
+opencv-python
+google-generativeai
+openai
+groq
+Pillow
+requests
