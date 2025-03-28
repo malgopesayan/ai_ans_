@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI MCQ Solver Pro</title>
+    <style>
+        body { background: #2E3440; color: #ECEFF4; font-family: Arial; }
+        .container { display: flex; padding: 20px; }
+        .left-panel { width: 500px; margin-right: 20px; }
+        .preview { background: #3B4252; padding: 10px; border-radius: 5px; }
+        video, #previewImg { width: 100%; border-radius: 5px; }
+        button { background: #434C5E; color: white; border: none; padding: 10px; margin: 5px 0; cursor: pointer; width: 100%; }
+        #results { background: #3B4252; padding: 20px; border-radius: 5px; flex-grow: 1; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <div class="preview">
+                <video id="video" hidden></video>
+                <img id="previewImg" src="">
+            </div>
+            <button onclick="capture()">📷 Open Camera</button>
+            <button onclick="document.getElementById('fileInput').click()">📁 Upload Image</button>
+            <input type="file" id="fileInput" hidden accept="image/*">
+            <button id="processBtn" onclick="process()" disabled>⚡ Process Image</button>
+        </div>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        let videoStream = null;
+        
+        async function capture() {
+            try {
+                videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const video = document.getElementById('video');
+                video.hidden = false;
+                video.srcObject = videoStream;
+                document.getElementById('previewImg').hidden = true;
+            } catch (err) {
+                alert('Error accessing camera: ' + err);
+            }
+        }
+
+        function takeSnapshot() {
+            const video = document.getElementById('video');
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            return canvas.toDataURL('image/jpeg');
+        }
+
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('previewImg').src = e.target.result;
+                document.getElementById('previewImg').hidden = false;
+                video.hidden = true;
+                document.getElementById('processBtn').disabled = false;
+            }
+            reader.readAsDataURL(file);
+        });
+
+        async function process() {
+            const img = document.getElementById('previewImg').src;
+            const response = await fetch('/upload', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: img })
+            });
+            
+            const checkResults = setInterval(async () => {
+                const response = await fetch('/results');
+                const results = await response.json();
+                document.getElementById('results').innerHTML = formatResults(results);
+                if (!results.error && Object.keys(results).length >= 5) {
+                    clearInterval(checkResults);
+                }
+            }, 1000);
+        }
+
+        function formatResults(results) {
+            let html = '<h2>AI Responses:</h2>';
+            for (const [model, response] of Object.entries(results)) {
+                html += `<p><strong>${model}:</strong> ${response}</p>`;
+            }
+            return html;
+        }
+    </script>
+</body>
+</html>

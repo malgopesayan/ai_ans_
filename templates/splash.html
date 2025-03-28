@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Loading...</title>
+    <style>
+        .splash-container {
+            background: #2E3440;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+        .splash-image {
+            max-width: 80%;
+            height: auto;
+            object-fit: contain;
+        }
+        .loading-text {
+            color: #ECEFF4;
+            margin-top: 20px;
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div class="splash-container">
+        <img src="{{ url_for('static', filename='sayan.png') }}" 
+             class="splash-image"
+             alt="Loading..."
+             onerror="this.style.display='none'; document.getElementById('error').style.display='block'">
+        
+        <div id="error" style="display: none; color: #BF616A;">
+            Error loading splash screen!
+        </div>
+        
+        <div class="loading-text">
+            Loading AI Solver...
+        </div>
+    </div>
+
+    <script>
+        // Better redirect handling
+        setTimeout(function() {
+            window.location.href = "/main";
+        }, 3000);
+    </script>
+</body>
+</html>
