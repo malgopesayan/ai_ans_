@@ -13,6 +13,7 @@ import io
 from threading import Lock
 
 app = Flask(__name__)
+run_with_ngrok(app)
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['SECRET_KEY'] = 'supersecretkey'
 
